@@ -97,6 +97,7 @@ https://github.com/IE-PY-2026-1/ie-py-homework-hiyang1224-dev/blob/main/%5B1%EC%
 
 ### **📁 증빙 자료:**
   * [2차_AI협업캡처.pdf 첨부 완료] (첨부 후 링크)
+  * https://github.com/IE-PY-2026-1/ie-py-homework-hiyang1224-dev/blob/main/AI%ED%98%91%EC%97%85%EC%A6%9D%EB%AA%852.pdf
   * [2차과제_실행결과.jpg]
 <br>
 
