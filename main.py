@@ -184,3 +184,152 @@ while True:
     else:
         print("잘못된 번호입니다. 1~3번 메뉴 중에서 선택해 주세요.")
         continue
+
+work_database = []
+
+
+def get_validated_number(prompt_message):
+    while True:
+        try:
+            user_input = int(input(prompt_message))
+            if user_input < 0:
+                print(" 음수는 입력할 수 없습니다. 다시 올바르게 입력해주세요.")
+                continue
+            return user_input
+        except ValueError:
+            print(" 올바른 숫자가 아닙니다. 정수 숫자로만 다시 입력해주세요.")
+
+
+def add_new_work_v3():
+    global total_points, total_incentive, work_database
+
+    print("[추가 작업 기록 시스템 V3.0]")
+    print("A~G 카테고리 중 하나를 입력하세요:")
+    new_choice = input("선택: ").upper()
+
+    if new_choice == 'A':
+        f_price, q_price = 600, 20
+    elif new_choice == 'B':
+        f_price, q_price = 500, 30
+    elif new_choice == 'C':
+        f_price, q_price = 400, 40
+    elif new_choice == 'D':
+        f_price, q_price = 300, 50
+    elif new_choice == 'E':
+        f_price, q_price = 200, 50
+    elif new_choice == 'F':
+        f_price, q_price = 70, 0
+    elif new_choice == 'G':
+        f_price, q_price = 100, 0
+    else:
+        print("잘못된 카테고리입니다. 메뉴로 돌아갑니다.")
+        return
+
+    new_f = get_validated_number("추가 작업한 파일 개수: ")
+    new_q = get_validated_number("추가 작업한 문항 수: ")
+
+    work_pay = (new_f * f_price) + (new_q * q_price)
+
+    inc_rates = get_incentive_rates(new_choice)
+    work_inc = (new_f * inc_rates[0]) + (new_q * inc_rates[1])
+
+    total_points += work_pay
+    total_incentive += work_inc
+
+    current_row = [new_choice, new_f, new_q, work_pay, round(work_inc, 2)]
+    work_database.append(current_row)
+
+    print(f"[이중 리스트 등록 완료] 장부 {len(work_database)}번 행에 데이터가 안전하게 적산되었습니다.")
+    print(f"(기본 급여: {work_pay}원 / 인센티브: {work_inc:.2f}P)")
+
+
+def show_all_database_records():
+    print("\n" + "=" * 65)
+    print(f" [ {name}의 전체 알바 정산 데이터베이스 장부 조회 ] ")
+    print("=" * 65)
+    print(f"{'행 번호':<8}{'작업 종류':<12}{'파일 수':<10}{'문항 수':<10}{'정산 금액':<14}{'인센티브':<10}")
+    print("-" * 65)
+
+    if not work_database:
+        print(f"{' ':^20}현재 등록된 기록 내역이 비어있습니다.")
+        print("=" * 65)
+        return
+    for i in range(len(work_database)):
+        record = work_database[i]
+
+        print(f" [{i+1:^4}]   {record[0]:<14}{record[1]:<12}{record[2]:<12}{record[3]:<16,}{record[4]:<10}P")
+
+    print("-" * 65)
+    print(f" 총 누적 장부 기록: {len(work_database)}건")
+    print("=" * 65)
+
+
+
+def save_records_to_text_file():
+    try:
+        with open("salary_장부데이터.txt", "w", encoding="utf-8") as file:
+            file.write("카테고리,파일수,문항수,정산금액,인센티브")
+
+            for row in work_database:
+
+                file.write(f"{row[0]},{row[1]},{row[2]},{row[3]},{row[4]}")
+
+        print(" [salary_장부데이터.txt] 파일에 전체 영구 저장이 완료되었습니다!")
+    except IOError:
+        print("장부 파일 저장 중 디스크 권한 또는 입출력 장치 오류(IOError)가 발생했습니다.")
+
+
+def load_records_from_text_file():
+    global work_database, total_points, total_incentive
+    try:
+        with open("salary_장부데이터.txt", "r", encoding="utf-8") as file:
+            lines = file.readlines()
+            for line in lines[1:]:
+                parsed_data = line.strip().split(',')
+
+                stored_choice = parsed_data[0]
+                stored_f = int(parsed_data[1])
+                stored_q = int(parsed_data[2])
+                stored_pay = int(parsed_data[3])
+                stored_inc = float(parsed_data[4])
+
+
+                work_database.append([stored_choice, stored_f, stored_q, stored_pay, stored_inc])
+                total_points += stored_pay
+                total_incentive += stored_inc
+
+        print(" [기존 데이터 동기화 완료] 이전에 저장된 급여 장부 내역을 정상적으로 불러왔습니다.")
+    except FileNotFoundError:
+        print(" [장부 신규 안내] 기존 백업 파일이 존재하지 않아 새로운 알바 급여 장부를 시작합니다.")
+
+
+
+
+load_records_from_text_file()
+
+while True:
+    print(f"--- {name}의 영구 저장형 통합 급여 매니저 V3.0 ---")
+    print("1. 신규 작업 기록하기 (이중 리스트 추가)")
+    print("2. 전체 작업 기록 장부 조회 (이중 순회 표 출력)")
+    print("3. 종합 누적 정산 보고서 및 보너스/세금 확인 (기존 함수)")
+    print("4. 급여 장부 파일로 강제 백업하기 (메모장 저장)")
+    print("5. 데이터 자동 저장 후 프로그램 안전 종료")
+    print("-" * 55)
+
+    v3_menu_choice = input("원하는 확장 메뉴 번호를 입력하세요: ")
+
+    if v3_menu_choice == '1':
+        add_new_work_v3()
+    elif v3_menu_choice == '2':
+        show_all_database_records()
+    elif v3_menu_choice == '3':
+        print_final_report()
+    elif v3_menu_choice == '4':
+        save_records_to_text_file()
+    elif v3_menu_choice == '5':
+        save_records_to_text_file()
+        print(f"모든 백업 데이터가 안전하게 저장되었습니다. {name} 매니저 시스템을 종료합니다.")
+        break
+    else:
+        print("올바른 메뉴 번호가 아닙니다. 1~5번 사이로 다시 선택해 주세요.")
+        continue
